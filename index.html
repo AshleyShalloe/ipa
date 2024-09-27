@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <title>IPA</title>
+    <style>
+        html {
+            font-family: sans-serif;
+            background: lightgray;
+        }
+
+        body {
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        body div {
+            padding: 10px;
+            margin: 10px;
+            border: 2px solid lightgray;
+            border-radius: 4px;
+            background: white;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ipaTable,
+        .ipaTable tr,
+        .ipaTable td {
+            border: 1px solid white;
+            border-collapse: collapse;
+        }
+
+        .ipaTable tr:nth-child(even) {
+            background: #f1f1f1;
+        }
+
+        .ipaTable tr:nth-child(odd) {
+            background: #c2c2c2;
+        }
+
+        .ipaTable .code {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .ipaTable .tooltip {
+            padding: 10px;
+        }
+
+        .ipaTable tr.space,
+        .ipaTable tr.space td {
+            background: white;
+        }
+
+        input,
+        button {
+            margin: 7px;
+            width: 100%;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        button {
+            background: white;
+            color: black;
+            box-shadow: 2px 2px 4px #80808080, -2px -2px 4px #ffffff6b;
+            border-radius: 0.4em;
+            border: 1px solid rgb(237, 237, 237);
+            transition: border 0.5s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        button:active {
+            color: darkblue;
+            box-shadow: inset 2px 2px 4px #80808080, inset -2px -2px 4px #ffffff6b;
+        }
+
+        button:hover {
+            border: 1px solid rgb(217, 217, 217);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button onclick="howDoYouSay('/ˌfraɪərn ˈbɑːrnɪt/')">How do you say Friern Barnet?</button>
+        <button onclick="howDoYouSay('/sɪˈnɛkdəki/')">How do you say synecdoche?</button>
+        <button onclick="howDoYouSay('/ˌflɒksiˌnɒsiˌnɪhɪlɪˌpɪlɪfɪˈkeɪʃən/')">How do you say floccinaucinihilipilification?</button>
+        <button onclick="howDoYouSay('/ˌsɛs.kwɪ.pɪˈdeɪ.lɪ.ən/')">How do you say sesquipedalian?</button>
+    </div>
+    <div>
+        <input type="text" id="textInput" oninput="doThing(this.value)" placeholder="Paste some IPA here"></input>
+    </div>
+    <div id="result">
+    </div>
+
+</body>
+<script>
+    'use strict'
+
+    function howDoYouSay(inputString) {
+        var targetElm = document.getElementById("textInput")
+        targetElm.value = inputString
+        doThing(inputString)
+    }
+
+    function doThing(inputValue) {
+        var tempString = inputValue
+        var resultArray = []
+
+        while (tempString.length) {
+            for (var code of ipaCodes) {
+                if (code == tempString.slice(0, code.length)) {
+                    tempString = tempString.slice(code.length)
+                    resultArray.push([code, codeToTooltip[code]])
+                    continue
+                }
+            }
+            resultArray.push([tempString.slice(0, 1), tempString.slice(0, 1)])
+            tempString = tempString.slice(1)
+        }
+
+        resultElm.innerHTML = ""
+        var tableElm = document.createElement("table")
+        tableElm.classList.add("ipaTable")
+
+        resultArray.forEach(x => {
+            var tempRow = document.createElement("tr")
+            var tempCell = document.createElement("td")
+            var tempCell2 = document.createElement("td")
+
+            if (x[0] == " ") {
+                tempRow.classList.add("space")
+                var spacerRow = document.createElement("tr")
+                spacerRow.innerHTML = "<td></td><td></td>"
+                spacerRow.classList.add("space")
+                tableElm.append(spacerRow)
+            }
+
+            tempCell.innerHTML = x[0]
+            tempCell2.innerHTML = x[1]
+
+            tempCell.classList.add("code")
+            tempCell2.classList.add("tooltip")
+
+            tempRow.append(tempCell, tempCell2)
+
+            tableElm.append(tempRow)
+        })
+
+        resultElm.append(tableElm)
+    }
+
+    var codeToTooltip = {}
+
+    // This module contains phoneme data for [[Module:IPAc-en]].
+    const ipaRef = [
+        {
+            code: "b",
+            label: "b",
+            tooltip: "'b' in 'buy'",
+        },
+        {
+            code: "d",
+            label: "d",
+            tooltip: "'d' in 'dye'",
+        },
+        {
+            code: "ᵈ",
+            aliases: ["(d)"],
+            label: "ᵈ",
+            tooltip: "optional 'd'",
+        },
+        {
+            code: "dj",
+            aliases: ["dy", "dʲ"],
+            label: "dj",
+            tooltip: "/dj/ 'd' in 'dew'",
+        },
+        {
+            code: "ð",
+            aliases: ["D", "dh"],
+            label: "ð",
+            tooltip: "/ð/ 'th' in 'thy'",
+        },
+        {
+            code: "dʒ",
+            aliases: ["J", "dZ", "dzh", "ʤ"],
+            label: "dʒ",
+            tooltip: "/dʒ/ 'j' in 'jam'",
+        },
+        {
+            code: "f",
+            label: "f",
+            tooltip: "'f' in 'find'",
+        },
+        {
+            code: "ɡ",
+            aliases: ["g"],
+            label: "ɡ",
+            tooltip: "'g' in 'guy'",
+        },
+        {
+            code: "h",
+            label: "h",
+            tooltip: "'h' in 'hi'",
+        },
+        {
+            code: "j",
+            aliases: ["y"],
+            label: "j",
+            tooltip: "/j/ 'y' in 'yes'",
+        },
+        {
+            code: "k",
+            label: "k",
+            tooltip: "'k' in 'kind'",
+        },
+        {
+            code: "l",
+            aliases: ["ɫ"],
+            label: "l",
+            tooltip: "'l' in 'lie'",
+        },
+        {
+            code: "lj",
+            aliases: ["ly", "lʲ"],
+            label: "lj",
+            tooltip: "/lj/ 'l' in 'lute'",
+        },
+        {
+            code: "m",
+            label: "m",
+            tooltip: "'m' in 'my'",
+        },
+        {
+            code: "n",
+            label: "n",
+            tooltip: "'n' in 'no'",
+        },
+        {
+            code: "nj",
+            aliases: ["ny", "nʲ"],
+            label: "nj",
+            tooltip: "/nj/ 'n' in 'new'",
+        },
+        {
+            code: "ŋ",
+            aliases: ["N", "ng"],
+            label: "ŋ",
+            tooltip: "/ŋ/ 'ng' in 'sing'",
+        },
+        {
+            code: "ŋg",
+            aliases: ["ngg", "Ng"],
+            label: "ŋɡ",
+            tooltip: "/ŋɡ/ 'ng' in 'finger'",
+        },
+        {
+            code: "θ",
+            aliases: ["T", "th"],
+            label: "θ",
+            tooltip: "/θ/ 'th' in 'thigh'",
+        },
+        {
+            code: "θj",
+            aliases: ["thy", "thj", "θʲ"],
+            label: "θj",
+            tooltip: "/θj/ 'th' in 'enthusiasm'",
+        },
+        {
+            code: "p",
+            label: "p",
+            tooltip: "'p' in 'pie'",
+        },
+        {
+            code: "r",
+            aliases: ["ɹ", "ɻ"],
+            label: "r",
+            tooltip: "'r' in 'rye'",
+        },
+        {
+            code: "s",
+            label: "s",
+            tooltip: "'s' in 'sigh'",
+        },
+        {
+            code: "sj",
+            aliases: ["sy", "sʲ"],
+            label: "sj",
+            tooltip: "/sj/ 's' in 'suit'",
+        },
+        {
+            code: "ʃ",
+            aliases: ["S", "sh"],
+            label: "ʃ",
+            tooltip: "/ʃ/ 'sh' in 'shy'",
+        },
+        {
+            code: "t",
+            label: "t",
+            tooltip: "'t' in 'tie'",
+        },
+        {
+            code: "ᵗ",
+            aliases: ["(t)"],
+            label: "ᵗ",
+            tooltip: "optional 't'",
+        },
+        {
+            code: "tj",
+            aliases: ["ty", "tʲ"],
+            label: "tj",
+            tooltip: "/tj/ 't' in 'tune'",
+        },
+        {
+            code: "tʃ",
+            aliases: ["C", "ch", "tS", "ʧ"],
+            label: "tʃ",
+            tooltip: "/tʃ/ 'ch' in 'china'",
+        },
+        {
+            code: "v",
+            label: "v",
+            tooltip: "'v' in 'vie'",
+        },
+        {
+            code: "w",
+            label: "w",
+            tooltip: "'w' in 'wind'",
+        },
+        {
+            code: "hw",
+            aliases: ["ʍ", "wh"],
+            label: "hw",
+            tooltip: "/hw/ 'wh' in 'why'",
+        },
+        {
+            code: "z",
+            label: "z",
+            tooltip: "'z' in 'Zion'",
+        },
+        {
+            code: "zj",
+            aliases: ["zy", "zʲ"],
+            label: "zj",
+            tooltip: "/zj/ 'z' in 'Zeus'",
+        },
+        {
+            code: "ʒ",
+            aliases: ["Z", "zh"],
+            label: "ʒ",
+            tooltip: "/ʒ/ 's' in 'pleasure'",
+        },
+        {
+            code: "x",
+            aliases: ["kh"],
+            label: "x",
+            tooltip: "/x/ 'ch' in 'loch'",
+        },
+        {
+            code: "ʔ",
+            aliases: ["?"],
+            label: "ʔ",
+            tooltip: "/ʔ/ the catch in 'uh-oh'",
+        },
+        {
+            code: "ɑː",
+            aliases: ["A:", "ah", "aa", "ɑ:", "ä", "â", "aː", "a:"],
+            label: "ɑː",
+            tooltip: "/ɑː/ 'a' in 'father'",
+        },
+        {
+            code: "ɑːr",
+            aliases: ["ar", "ɑɹ", "är", "âr", "aːr", "a:r", "ɑ:r", "ɑr"],
+            label: "ɑːr",
+            tooltip: "/ɑːr/ 'ar' in 'bard'",
+        },
+        {
+            code: "ɒ",
+            aliases: ["Q", "ŏ"],
+            label: "ɒ",
+            tooltip: "/ɒ/ short 'o' in 'body'",
+        },
+        {
+            code: "ɒ̃",
+            aliases: ["ɑ̃", "ɒ~", "ɑ~", "ã", "a~", "Q~"],
+            label: "ɒ̃",
+            tooltip: "/ɒ̃/ nasal 'an' in 'vin blanc'",
+        },
+        {
+            code: "ɒr",
+            aliases: ["ŏr", "Qr"],
+            label: "ɒr",
+            tooltip: "/ɒr/ 'or' in 'moral'",
+        },
+        {
+            code: "æ",
+            aliases: ["ae", "&", "[", "]", "ă"],
+            label: "æ",
+            tooltip: "/æ/ short 'a' in 'bad'",
+        },
+        {
+            code: "aɪ",
+            aliases: ["ai", "aI", "ye", "eye", "ī"],
+            label: "aɪ",
+            tooltip: "/aɪ/ long 'i' in 'tide'",
+        },
+        {
+            code: "aɪər",
+            aliases: ["aɪr", "aIr", "īr", "aɪə", "yr"],
+            label: "aɪər",
+            tooltip: "/aɪər/ 'ire' in 'fire'",
+        },
+        {
+            code: "aʊ",
+            aliases: ["au", "aU", "ow"],
+            label: "aʊ",
+            tooltip: "/aʊ/ 'ou' in 'pout'",
+        },
+        {
+            code: "aʊər",
+            aliases: ["aʊr", "aUr", "aʊə", "aur"],
+            label: "aʊər",
+            tooltip: "/aʊər/ 'our' in 'hour'",
+        },
+        {
+            code: "ɛ",
+            aliases: ["E", "ĕ"],
+            label: "ɛ",
+            tooltip: "/ɛ/ short 'e' in 'bed'",
+        },
+        {
+            code: "ɛr",
+            aliases: ["Er", "ĕr", "err"],
+            label: "ɛr",
+            tooltip: "/ɛr/ 'err' in 'merry'",
+        },
+        {
+            code: "eɪ",
+            aliases: ["ei", "eI", "ay", "ā", "eː", "e:"],
+            label: "eɪ",
+            tooltip: "/eɪ/ long 'a' in 'base'",
+        },
+        {
+            code: "ær",
+            aliases: ["aer", "&r", "æɹ", "ăr", "arr"],
+            label: "ær",
+            tooltip: "/ær/ 'arr' in 'marry'",
+        },
+        {
+            code: "ɛər",
+            aliases: ["eir", "eIr", "e@r", "E@r", "air", "ɛɪɹ", "eɪr", "eːr", "e:r", "ɛəɹ", "ār", "ɛə"],
+            label: "ɛər",
+            tooltip: "/ɛər/ 'are' in 'bare'",
+        },
+        {
+            code: "ɪ",
+            aliases: ["I", "ĭ"],
+            label: "ɪ",
+            tooltip: "/ɪ/ short 'i' in 'bid'",
+        },
+        {
+            code: "ɪr",
+            aliases: ["ĭr", "irr"],
+            label: "ɪr",
+            tooltip: "/ɪr/ 'irr' in 'mirror'",
+        },
+        {
+            code: "iː",
+            aliases: ["i:", "ee", "ē"],
+            label: "iː",
+            tooltip: "/iː/ long 'e' in 'seed'",
+        },
+        {
+            code: "ɪər",
+            aliases: ["i:r", "iːr", "I@r", "i@r", "eer", "ɪəɹ", "iːɹ", "ēr", "ɪə"],
+            label: "ɪər",
+            tooltip: "/ɪər/ 'ear' in 'beard'",
+        },
+        {
+            code: "ⁱ",
+            aliases: ["(i)", "(ɪ)"],
+            label: "ⁱ",
+            tooltip: "/ⁱ/ optional 'i' in 'nasturtium'",
+        },
+        {
+            code: "ᵊ",
+            aliases: ["(ə)", "(@)"],
+            label: "ᵊ",
+            tooltip: "/ᵊ/ optional 'ə' in 'jewelry'",
+        },
+        {
+            code: "ʲ",
+            aliases: ["(j)", "(y)", "ʸ"],
+            label: "ʲ",
+            tooltip: "/ʲ/ optional 'j' in 'Lucas'",
+        },
+        {
+            code: "ɔː",
+            aliases: ["O", "O:", "aw", "ɔ:", "ô", "ɒː", "Q:"],
+            label: "ɔː",
+            tooltip: "/ɔː/ 'au' in 'fraud'",
+        },
+        {
+            code: "ɔːr",
+            aliases: ["Or", "awr", "ɔɹ", "ôr", "ɔ(r)", "ɔr"],
+            label: "ɔːr",
+            tooltip: "/ɔːr/ 'or' in 'born'",
+        },
+        {
+            code: "ɔɪ",
+            aliases: ["oj", "ɔj", "oi", "oɪ", "ɔi", "OI", "oy"],
+            label: "ɔɪ",
+            tooltip: "/ɔɪ/ 'oy' in 'boy'",
+        },
+        {
+            code: "ɔɪər",
+            aliases: ["ɔɪr", "oyr", "ɔɪə"],
+            label: "ɔɪər",
+            tooltip: "/ɔɪər/ 'oir' in 'loir' (rare)",
+        },
+        {
+            code: "oʊ",
+            aliases: ["o:", "oː", "ou", "oU", "@u", "@U", "oh", "oe", "əʊ", "əu", "ɔʊ", "ɔu", "ō"],
+            label: "oʊ",
+            tooltip: "/oʊ/ long 'o' in 'code'",
+        },
+        {
+            code: "ɔər",
+            aliases: ["oUr", "ohr", "ɔəɹ", "ɔʊɹ", "oʊɹ", "oʊr", "oːr", "o:r", "ōr", "ɔə", "ɔə(r)"],
+            label: "ɔər",
+            tooltip: "/ɔər/ 'ore' in 'bore'",
+        },
+        {
+            code: "ʊ",
+            aliases: ["U", "uu", "ŏŏ"],
+            label: "ʊ",
+            tooltip: "/ʊ/ short 'oo' in 'foot'",
+        },
+        {
+            code: "ʊr",
+            aliases: ["uur", "Ur", "ŏŏr"],
+            label: "ʊr",
+            tooltip: "/ʊr/ 'our' in 'courier'",
+        },
+        {
+            code: "uː",
+            aliases: ["u:", "oo", "ōō"],
+            label: "uː",
+            tooltip: "/uː/ long 'oo' in 'food'",
+        },
+        {
+            code: "ʊər",
+            aliases: ["u:r", "uːr", "u@r", "U@r", "oor", "ʊəɹ", "ōōr", "ʊə"],
+            label: "ʊər",
+            tooltip: "/ʊər/ 'our' in 'tour'",
+        },
+        {
+            code: "juː",
+            aliases: ["ju:", "yu:", "yew", "ew", "ū", "yoo"],
+            label: "juː",
+            tooltip: "/juː/ long 'u' in 'cute'",
+        },
+        {
+            code: "jʊər",
+            aliases: ["ūr", "yoor", "ju:r", "juːr", "jʊə"],
+            label: "jʊər",
+            tooltip: "/jʊər/ 'ure' in 'cure'",
+        },
+        {
+            code: "ʌ",
+            aliases: ["V", "ŭ"],
+            label: "ʌ",
+            tooltip: "/ʌ/ short 'u' in 'bud'",
+        },
+        {
+            code: "ʌr",
+            aliases: ["urr", "Vr", "ʌɹ", "ŭr"],
+            label: "ʌr",
+            tooltip: "/ʌr/ 'urr' in 'hurry'",
+        },
+        {
+            code: "ɜːr",
+            aliases: ["3", "3:", "ɝː", "ɝ", "ɜː", "ɜ:", "ɜ", "3r", "3:r", "@:r", "@:", "ɜɹ", "ûr", "ɜ(r)", "ɜr"],
+            label: "ɜːr",
+            tooltip: "/ɜːr/ 'ir' in 'bird'",
+        },
+        {
+            code: "ə",
+            aliases: ["schwa", "@"],
+            label: "ə",
+            tooltip: "/ə/ 'a' in 'about'",
+        },
+        {
+            code: "ər",
+            aliases: ["ɚ", "@r", "əɹ", "ə(r)"],
+            label: "ər",
+            tooltip: "/ər/ 'er' in 'finger'",
+        },
+        {
+            code: "ən",
+            aliases: ["@n", "ᵊn", "n̩"],
+            label: "ən",
+            tooltip: "/ən/ 'on' in 'button'",
+        },
+        {
+            code: "oʊ-",
+            aliases: ["<s>o</s>", "o-", "ou-", "ɵ"],
+            label: "oʊ",
+            tooltip: "/oʊ/ or /ə/ 'o' in 'omit'",
+        },
+        {
+            code: "əm",
+            aliases: ["@m", "ᵊm", "m̩"],
+            label: "əm",
+            tooltip: "/əm/ 'm' in 'rhythm'",
+        },
+        {
+            code: "ᵻ",
+            aliases: ["<s>ɪ</s>", "i-", "I-", "ɪ-", "ɨ"],
+            label: "ᵻ",
+            tooltip: "/ɪ/ or /ə/ 'e' in 'roses'",
+        },
+        {
+            code: "ᵿ",
+            aliases: ["<s>ʊ</s>", "u-", "U-", "ʊ-", "ʉ"],
+            label: "ᵿ",
+            tooltip: "/ʊ/ or /ə/ 2nd 'u' in 'beautiful'",
+        },
+        {
+            code: "jᵿ",
+            aliases: ["j<s>ʊ</s>", "y<s>ʊ</s>", "ju-", "yu-", "jU-", "yU-", "jʊ-", "jʉ"],
+            label: "jᵿ",
+            tooltip: "/jʊ/ or /jə/ 2nd 'u' in 'curriculum'",
+        },
+        {
+            code: "əl",
+            aliases: ["@l", "ᵊl", "əɫ", "l̩"],
+            label: "əl",
+            tooltip: "/əl/ 'le' in 'bottle'",
+        },
+        {
+            code: "i",
+            label: "i",
+            tooltip: "/i/ 'y' in 'happy'",
+        },
+        {
+            code: "u",
+            label: "u",
+            tooltip: "/u/ 'u' in 'situation'",
+        },
+        {
+            code: "ˈ",
+            aliases: ["'"],
+            label: "ˈ",
+            tooltip: "/ˈ/ primary stress follows",
+        },
+        {
+            code: "ˌ",
+            aliases: [","],
+            label: "ˌ",
+            tooltip: "/ˌ/ secondary stress follows",
+        },
+        {
+            code: ".",
+            aliases: ["·"],
+            label: ".",
+            tooltip: "/./ syllable break",
+        },
+        {
+            code: "-",
+            aliases: ["–"],
+            label: "-",
+            tooltip: "/-/ affix",
+        },
+
+        // Separators
+        // Tables without tooltip text are used as word separators. In addition to
+        // not having any tooltip text in the template output, they are not
+        // underlined.
+        {
+            code: ",_",
+            label: ", ",
+        },
+        {
+            code: "_",
+            label: " ",
+        },
+        // this is useful for "and" in place names, which is highly variable and not important to transcribe
+        {
+            code: "and",
+            label: "/ & /",
+        },
+        // this is useful for other highly variable words in place names, which are not important to transcribe
+        {
+            code: "...",
+            label: "...",
+        }
+    ]
+
+    const ipaCodes = ipaRef.filter(x => x.tooltip).map(x => x.code)
+
+    function initCodeToTooltip() {
+        for (var x of ipaRef) {
+            codeToTooltip[x.code] = x.tooltip
+        }
+    }
+
+    const resultElm = document.getElementById("result")
+
+    function init() {
+        initCodeToTooltip()
+        document.getElementById("textInput").value = ""
+    }
+
+    init();
+</script>
+
+</html>
